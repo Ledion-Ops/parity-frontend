@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct RootView: View {
-    @EnvironmentObject var transactionsVM: TransactionsViewModel
+    @EnvironmentObject var userVM: UserViewModel
 
     var body: some View {
         TabView {
@@ -10,20 +10,15 @@ struct RootView: View {
                     Label("Dashboard", systemImage: "house")
                 }
 
-            SpendingView()
+            AccountsView()
                 .tabItem {
-                    Label("Spending", systemImage: "chart.bar.fill")
+                    Label("Accounts", systemImage: "banknote")
                 }
 
             TransactionsView()
                 .tabItem {
                     Label("Transactions", systemImage: "list.bullet")
                 }
-        }
-        .task {
-            if transactionsVM.allTransactions.isEmpty {
-                transactionsVM.fetchTransactions()
-            }
         }
     }
 }
