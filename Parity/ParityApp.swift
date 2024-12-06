@@ -1,17 +1,12 @@
-//
-//  ParityApp.swift
-//  Parity
-//
-//  Created by Santi on 12/4/24.
-//
-
 import SwiftUI
 
 @main
-struct ParityApp: App {
+struct MyApp: App {
+    @StateObject var transactionsVM = TransactionsViewModel()
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            RootView()
+                .environmentObject(transactionsVM)
         }
     }
 }

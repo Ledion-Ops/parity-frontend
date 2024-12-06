@@ -6,6 +6,11 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		B2488D922D00FC4C006D2CF0 /* .gitignore in Resources */ = {isa = PBXBuildFile; fileRef = B2488D912D00FC47006D2CF0 /* .gitignore */; };
+		B2488D992D010789006D2CF0 /* LinkKit in Frameworks */ = {isa = PBXBuildFile; productRef = B2488D982D010789006D2CF0 /* LinkKit */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		B2488D752D00F86E006D2CF0 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -27,6 +32,8 @@
 		B2488D642D00F86D006D2CF0 /* Parity.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Parity.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		B2488D742D00F86E006D2CF0 /* ParityTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ParityTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		B2488D7E2D00F86E006D2CF0 /* ParityUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ParityUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		B2488D912D00FC47006D2CF0 /* .gitignore */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitignore; sourceTree = "<group>"; };
+		B2488DA52D011CF5006D2CF0 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -52,6 +59,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B2488D992D010789006D2CF0 /* LinkKit in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -75,9 +83,12 @@
 		B2488D5B2D00F86D006D2CF0 = {
 			isa = PBXGroup;
 			children = (
+				B2488DA52D011CF5006D2CF0 /* Info.plist */,
+				B2488D912D00FC47006D2CF0 /* .gitignore */,
 				B2488D662D00F86D006D2CF0 /* Parity */,
 				B2488D772D00F86E006D2CF0 /* ParityTests */,
 				B2488D812D00F86E006D2CF0 /* ParityUITests */,
+				B2488D972D010789006D2CF0 /* Frameworks */,
 				B2488D652D00F86D006D2CF0 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -90,6 +101,13 @@
 				B2488D7E2D00F86E006D2CF0 /* ParityUITests.xctest */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		B2488D972D010789006D2CF0 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -112,6 +130,7 @@
 			);
 			name = Parity;
 			packageProductDependencies = (
+				B2488D982D010789006D2CF0 /* LinkKit */,
 			);
 			productName = Parity;
 			productReference = B2488D642D00F86D006D2CF0 /* Parity.app */;
@@ -195,6 +214,9 @@
 			);
 			mainGroup = B2488D5B2D00F86D006D2CF0;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				B2488D962D010624006D2CF0 /* XCRemoteSwiftPackageReference "plaid-link-ios" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = B2488D652D00F86D006D2CF0 /* Products */;
 			projectDirPath = "";
@@ -212,6 +234,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B2488D922D00FC4C006D2CF0 /* .gitignore in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -399,6 +422,7 @@
 				DEVELOPMENT_TEAM = P6VGD286FB;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = ./Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -428,6 +452,7 @@
 				DEVELOPMENT_TEAM = P6VGD286FB;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = ./Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -558,6 +583,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		B2488D962D010624006D2CF0 /* XCRemoteSwiftPackageReference "plaid-link-ios" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/plaid/plaid-link-ios";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 6.0.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		B2488D982D010789006D2CF0 /* LinkKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = B2488D962D010624006D2CF0 /* XCRemoteSwiftPackageReference "plaid-link-ios" */;
+			productName = LinkKit;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = B2488D5C2D00F86D006D2CF0 /* Project object */;
 }
