@@ -16,7 +16,8 @@ struct LineChartView: View {
     var changeDescription: String
     var lineColor: Color = .purple
     var fillColor: Color = .purple.opacity(0.3)
-    var xAxisDates: [Date] = [] // To control x-axis tick marks
+    var showAxes: Bool = true
+    var showEndDot: Bool = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -26,30 +27,26 @@ struct LineChartView: View {
                     Text(title)
                         .font(.caption)
                         .foregroundColor(.secondary)
-                        .fixedSize(horizontal: false, vertical: true) // allow wrapping
                     Text(formatCurrency(currentValue))
                         .font(.largeTitle)
                         .fontWeight(.bold)
-                        .lineLimit(1) // no line break for number
+                        .lineLimit(1)
                 }
 
                 Spacer()
 
-                // Change description
-                VStack(alignment: .trailing, spacing: 4) {
-                    let isPositive = changeValue >= 0
-                    HStack {
-                        Image(systemName: isPositive ? "arrow.up.right" : "arrow.down.right")
-                            .foregroundColor(isPositive ? .green : .red)
-                        Text("\(formatCurrency(changeValue)) \(changeDescription)")
-                            .foregroundColor(isPositive ? .green : .red)
-                            .font(.callout)
-                            .fixedSize(horizontal: false, vertical: true)
-                    }
+                // Change description (no line break)
+                let isPositive = changeValue >= 0
+                HStack {
+                    Image(systemName: isPositive ? "arrow.up.right" : "arrow.down.right")
+                        .foregroundColor(isPositive ? .green : .red)
+                    Text("\(formatCurrency(changeValue)) \(changeDescription)")
+                        .foregroundColor(isPositive ? .green : .red)
+                        .font(.callout)
+                        .lineLimit(1)
                 }
             }
 
-            // Chart
             Chart {
                 ForEach(data) { point in
                     LineMark(
@@ -72,33 +69,20 @@ struct LineChartView: View {
                     )
                     .interpolationMethod(.catmullRom)
                 }
-            }
-            .chartXAxis {
-                if !xAxisDates.isEmpty {
-                    AxisMarks(values: xAxisDates) { value in
-                        AxisGridLine()
-                        AxisTick()
-                        AxisValueLabel(format: .dateTime.month().day())
-                    }
-                } else {
-                    // fallback if xAxisDates not provided
-                    AxisMarks(preset: .automatic)
-                }
-            }
-            .chartYAxis {
-                AxisMarks(position: .leading) { value in
-                    if let v = value.as(Double.self) {
-                        AxisValueLabel {
-                            Text(formatCurrency(v))
-                                .font(.caption)
-                        }
-                        AxisGridLine()
-                        AxisTick()
-                    }
+
+                if showEndDot, let lastPoint = data.last {
+                    PointMark(
+                        x: .value("Date", lastPoint.x),
+                        y: .value("Amount", lastPoint.y)
+                    )
+                    .symbol(.circle)
+                    .foregroundStyle(lineColor)
                 }
             }
             .frame(height: 150)
             .padding(.top, 8)
+            .chartXAxis(showAxes ? .automatic : .hidden)
+            .chartYAxis(showAxes ? .automatic : .hidden)
 
             Text(subtitle)
                 .font(.footnote)

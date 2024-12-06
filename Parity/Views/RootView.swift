@@ -1,9 +1,11 @@
 import SwiftUI
 
 struct RootView: View {
+    @EnvironmentObject var transactionsVM: TransactionsViewModel
+
     var body: some View {
         TabView {
-            DashboardView() // Uses transactions from environment
+            DashboardView()
                 .tabItem {
                     Label("Dashboard", systemImage: "house")
                 }
@@ -17,6 +19,11 @@ struct RootView: View {
                 .tabItem {
                     Label("Transactions", systemImage: "list.bullet")
                 }
+        }
+        .task {
+            if transactionsVM.allTransactions.isEmpty {
+                transactionsVM.fetchTransactions()
+            }
         }
     }
 }

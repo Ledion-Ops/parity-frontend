@@ -3,83 +3,93 @@ import SwiftUI
 struct DashboardView: View {
     @EnvironmentObject var viewModel: TransactionsViewModel
 
-    // We assume all transactions are from the last 30 days as per the VM’s logic.
-    // Let's extract a current month cumulative spending dataset.
     @State private var jointSpendingData: [LineChartDataPoint] = []
     @State private var mySpendingData: [LineChartDataPoint] = []
     @State private var currentMonthTransactions: [Transaction] = []
+    @State private var comparisonValue: Double = 0.0 // For top right number on charts
 
     var body: some View {
         NavigationView {
             ScrollView {
-                VStack(spacing: 16) {
-                    TabView {
-                        LineChartView(
-                            data: jointSpendingData,
-                            title: "Joint Spending",
-                            subtitle: "As of Today",
-                            currentValue: jointSpendingData.last?.y ?? 0,
-                            changeValue: 1019, // Integrate real logic here if needed
-                            changeDescription: "in the last month",
-                            lineColor: .purple,
-                            fillColor: .purple.opacity(0.3),
-                            xAxisDates: xAxisDates(for: jointSpendingData)
-                        )
+                if viewModel.allTransactions.isEmpty {
+                    ProgressView("Loading transactions...")
                         .padding()
-
-                        // "My Spending This Month" chart
-                        LineChartView(
-                            data: mySpendingData,
-                            title: "My Spending",
-                            subtitle: "As of Today",
-                            currentValue: mySpendingData.last?.y ?? 0,
-                            changeValue: 200, // Integrate real logic here if needed
-                            changeDescription: "this month",
-                            lineColor: .blue,
-                            fillColor: .blue.opacity(0.3),
-                            xAxisDates: xAxisDates(for: mySpendingData)
-                        )
-                        .padding()
-                    }
-                    .tabViewStyle(.page(indexDisplayMode: .automatic))
-                    .frame(height: 300) // Chart height + padding
-                }
-                .onAppear {
-                    prepareData()
-                }
-
-                Divider()
-                    .padding([.top, .bottom], 8)
-
-                // Show current month’s transactions below the charts
-                if !currentMonthTransactions.isEmpty {
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("This Month's Transactions")
-                            .font(.headline)
-                            .padding(.leading)
-
-                        ForEach(currentMonthTransactions) { transaction in
-                            VStack(alignment: .leading) {
-                                Text(transaction.name)
-                                    .font(.headline)
-                                Text(transaction.date)
-                                    .font(.subheadline)
-                                Text("$\(transaction.amount, specifier: "%.2f")")
-                                    .font(.body)
-                                    .foregroundColor(transaction.amount < 0 ? .red : .green)
-                            }
+                } else {
+                    VStack(spacing: 16) {
+                        // Charts
+                        TabView {
+                            LineChartView(
+                                data: jointSpendingData,
+                                title: "This Month's Joint Spending",
+                                subtitle: "As of Today",
+                                currentValue: jointSpendingData.last?.y ?? 0,
+                                changeValue: comparisonValue,
+                                changeDescription: "this month vs last month",
+                                lineColor: .purple,
+                                fillColor: .purple.opacity(0.3),
+                                showAxes: false, // No axes for dashboard
+                                showEndDot: true
+                            )
                             .padding()
-                            .background(Color(.systemBackground))
-                            .cornerRadius(8)
-                            .shadow(color: .gray.opacity(0.1), radius: 2, x: 0, y: 1)
-                            .padding([.leading, .trailing])
+
+                            LineChartView(
+                                data: mySpendingData,
+                                title: "My Spending This Month",
+                                subtitle: "As of Today",
+                                currentValue: mySpendingData.last?.y ?? 0,
+                                changeValue: comparisonValue,
+                                changeDescription: "this month vs last month",
+                                lineColor: .blue,
+                                fillColor: .blue.opacity(0.3),
+                                showAxes: false,
+                                showEndDot: true
+                            )
+                            .padding()
+                        }
+                        .tabViewStyle(.page(indexDisplayMode: .automatic))
+                        .frame(height: 300)
+
+                        Divider()
+                            .padding([.top, .bottom], 8)
+
+                        // Current month transactions
+                        if !currentMonthTransactions.isEmpty {
+                            VStack(alignment: .leading, spacing: 8) {
+                                Text("This Month's Transactions")
+                                    .font(.headline)
+                                    .padding(.leading)
+
+                                ForEach(currentMonthTransactions) { transaction in
+                                    VStack(alignment: .leading) {
+                                        Text(transaction.name)
+                                            .font(.headline)
+                                        Text(transaction.date)
+                                            .font(.subheadline)
+                                        Text("$\(transaction.amount, specifier: "%.2f")")
+                                            .font(.body)
+                                            .foregroundColor(transaction.amount < 0 ? .red : .green)
+                                    }
+                                    .padding()
+                                    .background(Color(.systemBackground))
+                                    .cornerRadius(8)
+                                    .shadow(color: .gray.opacity(0.1), radius: 2, x: 0, y: 1)
+                                    .padding([.leading, .trailing])
+                                }
+                            }
+                            .padding(.bottom, 20)
+                        } else {
+                            Text("No transactions this month.")
+                                .foregroundColor(.secondary)
+                                .padding()
                         }
                     }
-                    .padding(.bottom, 20)
-                } else {
-                    Text("No transactions this month.")
-                        .foregroundColor(.secondary)
-                        .padding()
+                    .onAppear {
+                        prepareData()
+                    }
+                    .onChange(of: viewModel.allTransactions) { _ in
+                        // If transactions update after load, refresh data
+                        prepareData()
+                    }
                 }
             }
             .navigationTitle("Dashboard")
@@ -90,23 +100,23 @@ struct DashboardView: View {
         let currentMonthData = currentMonthTransactionsData()
         currentMonthTransactions = currentMonthData.transactions
 
-        // Create cumulative sums for jointSpendingData and mySpendingData
-        // For demonstration, assume all transactions are joint spending.
-        // For "My Spending", we could filter by a condition (e.g., transaction.name.contains("My Account"))
         jointSpendingData = cumulativeDataPoints(from: currentMonthData.transactions)
         mySpendingData = cumulativeDataPoints(from: currentMonthData.transactions)
+
+        comparisonValue = calculateComparisonValue(currentMonthData: currentMonthData)
     }
 
     private func currentMonthTransactionsData() -> (transactions: [Transaction], startDate: Date, endDate: Date) {
         let calendar = Calendar.current
         let now = Date()
-        // Start of this month
         let comps = calendar.dateComponents([.year, .month], from: now)
-        let startOfMonth = calendar.date(from: comps)!
+        guard let startOfMonth = calendar.date(from: comps) else {
+            return ([], now, now)
+        }
         let endOfMonth = calendar.date(byAdding: DateComponents(month: 1, day: -1), to: startOfMonth)!
 
         let filtered = viewModel.allTransactions.filter { txn in
-            if let txnDate = dateFromString(txn.date) {
+            if let txnDate = viewModel.dateFromString(txn.date) {
                 return txnDate >= startOfMonth && txnDate <= endOfMonth
             }
             return false
@@ -116,16 +126,17 @@ struct DashboardView: View {
     }
 
     private func cumulativeDataPoints(from transactions: [Transaction]) -> [LineChartDataPoint] {
-        // Sort transactions by date
-        let sortedTx = transactions.sorted { dateFromString($0.date)! < dateFromString($1.date)! }
+        let sortedTx = transactions.sorted {
+            guard let d1 = viewModel.dateFromString($0.date), let d2 = viewModel.dateFromString($1.date) else { return false }
+            return d1 < d2
+        }
         var cumulative: Double = 0
         var points: [LineChartDataPoint] = []
 
         for txn in sortedTx {
-            // Assume negative amounts represent spending; add absolute value to the cumulative sum
             let valueToAdd = abs(txn.amount)
             cumulative += valueToAdd
-            if let d = dateFromString(txn.date) {
+            if let d = viewModel.dateFromString(txn.date) {
                 points.append(LineChartDataPoint(x: d, y: cumulative))
             }
         }
@@ -133,17 +144,51 @@ struct DashboardView: View {
         return points
     }
 
-    private func xAxisDates(for data: [LineChartDataPoint]) -> [Date] {
-        guard let first = data.first?.x, let last = data.last?.x else { return [] }
+    private func calculateComparisonValue(currentMonthData: (transactions: [Transaction], startDate: Date, endDate: Date)) -> Double {
         let calendar = Calendar.current
-        // Show 3 ticks: start of month, midpoint, end of month
-        let midDate = calendar.date(byAdding: .day, value: 15, to: first)
-        return [first, midDate ?? first, last].sorted()
+        // If today is Dec 5, we check last month's (Nov) spending up to Nov 5.
+        let now = Date()
+        let dayOfMonth = calendar.component(.day, from: now)
+        
+        guard let lastMonthSameDay = calendar.date(byAdding: .month, value: -1, to: now) else {
+            return 0
+        }
+
+        // Get last month's start and the dayOfMonth date
+        let lastMonthComps = calendar.dateComponents([.year, .month], from: lastMonthSameDay)
+        guard let lastMonthStart = calendar.date(from: lastMonthComps) else { return 0 }
+
+        // dayOfMonth date for last month
+        let lastMonthDayOfMonthDate = calendar.date(bySetting: .day, value: dayOfMonth, of: lastMonthStart) ?? lastMonthStart
+
+        let lastMonthTransactions = viewModel.allTransactions.filter { txn in
+            if let txnDate = viewModel.dateFromString(txn.date) {
+                return txnDate >= lastMonthStart && txnDate <= lastMonthDayOfMonthDate
+            }
+            return false
+        }
+
+        let lastMonthCumulative = cumulativeTotal(from: lastMonthTransactions)
+        let currentMonthCumulative = cumulativeTotal(from: currentMonthData.transactions, upToDay: dayOfMonth, startDate: currentMonthData.startDate)
+
+        // difference = currentMonthCumulative - lastMonthCumulative
+        return currentMonthCumulative - lastMonthCumulative
     }
 
-    private func dateFromString(_ str: String) -> Date? {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "yyyy-MM-dd"
-        return formatter.date(from: str)
+    private func cumulativeTotal(from transactions: [Transaction], upToDay day: Int? = nil, startDate: Date? = nil) -> Double {
+        var filtered = transactions
+        if let d = day, let start = startDate {
+            // If we want up to a certain day in current month
+            let calendar = Calendar.current
+            let targetDate = calendar.date(bySetting: .day, value: d, of: start) ?? start
+            filtered = transactions.filter {
+                if let txnDate = viewModel.dateFromString($0.date) {
+                    return txnDate <= targetDate
+                }
+                return false
+            }
+        }
+
+        return filtered.reduce(0.0) { $0 + abs($1.amount) }
     }
 }

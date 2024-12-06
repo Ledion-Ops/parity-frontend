@@ -136,7 +136,6 @@ class TransactionsViewModel: ObservableObject {
             .store(in: &cancellables)
     }
 
-    // Searching & Grouping
     var filteredTransactions: [Transaction] {
         if searchText.isEmpty {
             return allTransactions
@@ -157,7 +156,7 @@ class TransactionsViewModel: ObservableObject {
         }
     }
 
-    private func monthYearString(from dateString: String) -> String {
+    func monthYearString(from dateString: String) -> String {
         let formatter = DateFormatter()
         formatter.dateFormat = "yyyy-MM-dd"
         guard let date = formatter.date(from: dateString) else { return "" }
@@ -167,9 +166,15 @@ class TransactionsViewModel: ObservableObject {
         return outFormatter.string(from: date)
     }
 
-    private func monthYearToDate(_ monthYear: String) -> Date {
+    func monthYearToDate(_ monthYear: String) -> Date {
         let formatter = DateFormatter()
         formatter.dateFormat = "LLLL yyyy"
         return formatter.date(from: monthYear) ?? Date.distantPast
+    }
+
+    func dateFromString(_ str: String) -> Date? {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"
+        return formatter.date(from: str)
     }
 }

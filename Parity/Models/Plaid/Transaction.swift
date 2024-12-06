@@ -1,6 +1,6 @@
 import Foundation
 
-struct Transaction: Identifiable {
+struct Transaction: Identifiable, Equatable {
     let id: String
     let name: String
     let amount: Double
@@ -12,6 +12,7 @@ struct Transaction: Identifiable {
         self.amount = plaidTransaction.amount
         self.date = plaidTransaction.date
     }
+
 }
 
 struct PlaidTransaction: Decodable {

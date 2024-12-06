@@ -26,6 +26,7 @@ struct TransactionsView: View {
                         }
                     }
                     .searchable(text: $viewModel.searchText)
+                    .listStyle(.plain) // Ensures sticky headers
                 } else {
                     Text("No transactions available.")
                         .padding()
